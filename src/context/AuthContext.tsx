@@ -4,7 +4,6 @@ import {
   ReactNode,
   SetStateAction,
   createContext,
-  useEffect,
   useState,
 } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";

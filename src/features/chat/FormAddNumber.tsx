@@ -8,10 +8,8 @@ import {
 import { GlobalContext } from "../../context/GlobalContext";
 
 export default function FormAddNumber({
-  showForm,
   setShowForm,
 }: {
-  showForm: boolean;
   setShowForm: Dispatch<SetStateAction<boolean>>;
 }) {
   const { handleAddContact } = useContext(GlobalContext);

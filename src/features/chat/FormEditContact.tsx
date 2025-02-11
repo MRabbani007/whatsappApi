@@ -52,7 +52,10 @@ export default function FormEditContact({
       <form
         onSubmit={handleSubmit}
         onReset={handleReset}
-        className="shadow-md shadow-zinc-500 rounded-lg bg-zinc-100"
+        className={
+          (showForm ? "" : "") +
+          " shadow-md shadow-zinc-500 rounded-lg bg-zinc-100"
+        }
       >
         <div className="py-2 px-4 flex items-center justify-between bg-green-700 text-white rounded-t-lg">
           <p>Update Contact</p>

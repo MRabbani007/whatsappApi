@@ -62,12 +62,7 @@ export default function Contacts({
           Add Contact
         </button>
       </div>
-      {showAddContact && (
-        <FormAddNumber
-          showForm={showAddContact}
-          setShowForm={setShowAddContact}
-        />
-      )}
+      {showAddContact && <FormAddNumber setShowForm={setShowAddContact} />}
       {edit && editItem && (
         <FormEditContact
           contact={editItem}
