@@ -3,12 +3,13 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Layout from "./layouts/Layout";
 import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
 import MissingPage from "./pages/MissingPage";
 import ContactsPage from "./pages/user/ContactsPage";
 import ChatPage from "./pages/user/ChatPage";
 import RequireAuth from "./features/auth/RequireAuth";
 import Providers from "./context/Providers";
+import SettingsPage from "./pages/user/SettingsPage";
+import LayoutUser from "./layouts/LayoutUser";
 
 export default function App() {
   return (
@@ -17,10 +18,12 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
           <Route element={<RequireAuth />}>
-            <Route path="contacts" element={<ContactsPage />} />
-            <Route path="chat" element={<ChatPage />} />
+            <Route element={<LayoutUser />}>
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="contacts" element={<ContactsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
           </Route>
         </Route>
         {/* catch all */}

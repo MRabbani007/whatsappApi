@@ -17,7 +17,7 @@ type InitialState = {
   handleAddContact: (contact: Contact) => void;
   handleEditContact: (contact: Contact) => void;
   handleDeleteContact: (contact: Contact) => void;
-  clearAllContacts: () => void;
+  clearAll: () => void;
   chats: Chat[];
   ReceiveNotification: () => void;
   activeChat?: Chat | null;
@@ -32,7 +32,7 @@ const initialState: InitialState = {
   handleAddContact: () => {},
   handleEditContact: () => {},
   handleDeleteContact: () => {},
-  clearAllContacts: () => {},
+  clearAll: () => {},
   chats: [],
   ReceiveNotification: () => {},
   activeChat: null,
@@ -47,6 +47,8 @@ export const GlobalContext = createContext(initialState);
 export default function GlobalProvider({ children }: { children: ReactNode }) {
   const { auth } = useContext(AuthContext);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
+
+  const [isPolling, setIsPolling] = useState(true);
 
   const [contacts, handleContacts] = useLocalStorage<Contact[]>("contacts", []);
   const [chats, handleChats] = useLocalStorage<Chat[]>("chats", []);
@@ -98,7 +100,7 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearAllContacts = () => {
+  const clearAll = () => {
     if (confirm("Are you sure you want to delete all contacts?")) {
       handleContacts([]);
       handleChats([]);
@@ -180,39 +182,72 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
   };
 
   const ReceiveNotification = async () => {
-    const url = `https://7103.api.greenapi.com/waInstance${auth?.idInstance}/receiveNotification/${auth?.apiTokenInstance}`;
+    try {
+      if (!auth?.idInstance || !auth?.apiTokenInstance) {
+        return null;
+      }
 
-    const receiveTimeout = 5; // seconds
+      console.log("Receive Start");
 
-    const response = await axios({
-      url,
-      method: "GET",
-      params: { receiveTimeout },
-    });
+      const url = `https://7103.api.greenapi.com/waInstance${auth?.idInstance}/receiveNotification/${auth?.apiTokenInstance}`;
 
-    const messageData: MessageData = response?.data?.body?.messageData;
-    const senderData: SenderData = response?.data?.body?.senderData;
+      const receiveTimeout = 5; // seconds
 
-    if (messageData && senderData) {
-      const temp = Array.isArray(messages) ? messages : [];
-      handleMessages([
-        ...temp,
-        {
-          id: response?.data?.idMessage,
+      const response = await axios({
+        url,
+        method: "GET",
+        params: { receiveTimeout },
+      });
+
+      if (response?.status !== 200) {
+        throw new Error("API Error");
+      }
+
+      const data =
+        typeof response?.data === "string"
+          ? JSON.parse(response?.data)
+          : response?.data;
+
+      const messageData: MessageData = data?.body?.messageData;
+      const senderData: SenderData = data?.body?.senderData;
+
+      if (messageData && senderData) {
+        const temp = Array.isArray(messages) ? messages : [];
+
+        const newMessage = {
+          id: response?.data?.body?.idMessage ?? crypto.randomUUID(),
           message:
             messageData?.extendedTextMessageData?.text ??
             messageData?.textMessageData?.textMessage,
           senderId: senderData.sender,
           chatId: senderData?.chatId,
-        },
-      ]);
-    }
+        };
 
-    const receiptId = response?.data?.receiptId;
+        console.log(newMessage);
+        handleMessages([...temp, newMessage]);
+      }
 
-    if (receiptId) {
-      await DeleteNotification(receiptId);
+      const receiptId = data?.receiptId;
+
+      if (receiptId) {
+        await DeleteNotification(receiptId);
+
+        // Continue polling if there's a valid response
+        scheduleNextFetch(100);
+      }
+    } catch (error) {
+      console.error("Polling stopped due to error:", error);
+
+      scheduleNextFetch(10000);
     }
+  };
+
+  const scheduleNextFetch = (timeOut: number = 5000) => {
+    setTimeout(() => {
+      if (isPolling) {
+        ReceiveNotification();
+      }
+    }, timeOut);
   };
 
   const DeleteNotification = async (receiptId: number) => {
@@ -227,9 +262,23 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let intervalId = null;
+
     if (auth?.idInstance) {
-      ReceiveNotification();
+      setIsPolling(true);
+      ReceiveNotification(); // Start polling on mount
+      intervalId = setInterval(() => {
+        ReceiveNotification();
+      }, 10000);
     }
+
+    return () => {
+      // Cleanup on unmount
+      setIsPolling(false);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [auth, activeChat]);
 
   return (
@@ -239,7 +288,7 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
         handleAddContact,
         handleEditContact,
         handleDeleteContact,
-        clearAllContacts,
+        clearAll,
         ReceiveNotification,
         chats,
         activeChat,

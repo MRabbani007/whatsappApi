@@ -16,8 +16,13 @@ export default function MissingPage() {
         </Link>
       </div>
       <div className="flex-1 flex flex-col gap-2 items-center justify-center">
-        <p>Page Not Found</p>
-        <Link to={location?.state?.from ?? "/"}>Go Back</Link>
+        <p>Coming Soon!</p>
+        <Link
+          to={location?.state?.from ?? "/"}
+          className="text-sm py-2 px-4 bg-green-700 text-white rounded-md hover:bg-green-600 duration-200"
+        >
+          Go Back
+        </Link>
       </div>
     </div>
   );

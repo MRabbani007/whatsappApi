@@ -1,20 +1,29 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import { FaWhatsapp } from "react-icons/fa";
 
 export default function LoginPage() {
-  const { credentials, handleLogin } = useContext(AuthContext);
+  const { auth, credentials, handleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState(credentials?.idInstance ?? "");
-  const [password, setPassword] = useState(credentials?.apiTokenInstance ?? "");
+  useEffect(() => {
+    if (auth?.idInstance && auth?.apiTokenInstance) {
+      navigate("/chat");
+    }
+  }, [auth]);
+
+  const [idInstance, setIdInstance] = useState(credentials?.idInstance ?? "");
+  const [apiTokenInstance, setPassword] = useState(
+    credentials?.apiTokenInstance ?? ""
+  );
+
   const [remember, setRemember] = useState(true);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    await handleLogin(username, password, remember);
+    await handleLogin(idInstance, apiTokenInstance, remember);
 
     navigate("/chat");
   };
@@ -42,22 +51,24 @@ export default function LoginPage() {
             </label>
             <input
               type="text"
-              id="username"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="idInstance"
+              name="idInstance"
+              value={idInstance}
+              placeholder="Enter your IdInstance"
+              onChange={(e) => setIdInstance(e.target.value)}
               className="border-[1px] rounded-md border-green-700 py-1 px-2"
             />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="password" className="text-sm">
+            <label htmlFor="apiTokenInstance" className="text-sm">
               Password
             </label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={password}
+              id="apiTokenInstance"
+              name="apiTokenInstance"
+              value={apiTokenInstance}
+              placeholder="Enter your Api token"
               onChange={(e) => setPassword(e.target.value)}
               className="border-[1px] rounded-md border-green-700 py-1 px-2"
             />
@@ -79,8 +90,6 @@ export default function LoginPage() {
             >
               Sign In
             </button>
-            <span>or</span>
-            <Link to={"/register"}>Register</Link>
           </div>
         </form>
       </div>

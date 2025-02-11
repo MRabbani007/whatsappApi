@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     remember: boolean
   ) => {
     if (!idInstance.trim() || !apiTokenInstance.trim()) {
+      console.log("Provide credentials");
       return null;
     }
 
@@ -70,9 +71,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           avatar,
         });
       } else {
-        alert("Login Error");
+        console.log("Login failed");
+        console.log(response);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log("Login Error");
+    }
   };
 
   const handleLogout = () => {

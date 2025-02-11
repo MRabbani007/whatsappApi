@@ -10,8 +10,7 @@ export default function Contacts({
 }: {
   setShowContacts: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { contacts, handleCreateChat, clearAllContacts } =
-    useContext(GlobalContext);
+  const { contacts, handleCreateChat } = useContext(GlobalContext);
 
   const [showAddContact, setShowAddContact] = useState(false);
 
@@ -61,12 +60,6 @@ export default function Contacts({
           className="py-1 text-sm flex items-center justify-center text-white bg-green-700 hover:bg-green-600 duration-200 rounded-full"
         >
           Add Contact
-        </button>
-        <button
-          onClick={clearAllContacts}
-          className="mt-auto py-1 text-sm flex items-center justify-center text-white bg-red-700 hover:bg-red-600 duration-200 rounded-full"
-        >
-          Clear Contacts
         </button>
       </div>
       {showAddContact && (
