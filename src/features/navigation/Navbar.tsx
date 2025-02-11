@@ -7,8 +7,6 @@ import { FaShop } from "react-icons/fa6";
 import { IoSettingsOutline } from "react-icons/io5";
 
 export default function Navbar() {
-  // const { auth, handleLogout } = useContext(AuthContext);
-
   return (
     <nav className="flex flex-col items-center justify-between gap-4 p-4 bg-cyan-950 text-zinc-400">
       <div className="flex flex-col gap-3">
