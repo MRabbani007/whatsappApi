@@ -10,8 +10,8 @@ export default function ChatsContainer() {
 
   const [showContacts, setShowContacts] = useState(false);
 
-  const chatsContent =
-    Array.isArray(chats) && chats.length === 0 ? (
+  const chatsContent = Array.isArray(chats) ? (
+    chats.length === 0 ? (
       <div className="text-sm p-2 space-y-2">
         <p>You don't have any chats, start messaging now</p>
         <button
@@ -23,7 +23,8 @@ export default function ChatsContainer() {
       </div>
     ) : (
       chats.map((item) => <CardChat chat={item} key={item.id} />)
-    );
+    )
+  ) : null;
 
   return (
     <div className="flex flex-col w-[400px] bg-zinc-900 text-zinc-400 relative">
