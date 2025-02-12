@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
 import FormSendMessage from "../../features/chat/FormSendMessage";
 import ChatsContainer from "../../features/chat/ChatsContainer";
@@ -12,10 +12,7 @@ export default function ChatPage() {
       ? messages.filter((item) => item?.chatId === activeChat?.id)
       : [];
 
-  console.log(messages);
-  console.log(chatMessages);
-
-  useEffect(() => {}, [messages]);
+  console.log("Chat body");
 
   return (
     <main className="flex-1 flex items-stretch">

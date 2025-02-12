@@ -46,13 +46,26 @@ export const GlobalContext = createContext(initialState);
 
 export default function GlobalProvider({ children }: { children: ReactNode }) {
   const { auth } = useContext(AuthContext);
+
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
 
-  const [isPolling, setIsPolling] = useState(true);
+  const [isPolling, setIsPolling] = useState(false);
 
   const [contacts, handleContacts] = useLocalStorage<Contact[]>("contacts", []);
   const [chats, handleChats] = useLocalStorage<Chat[]>("chats", []);
-  const [messages, handleMessages] = useLocalStorage("messages", []);
+  const [messagesLocal, handleMessages] = useLocalStorage("messages", []);
+
+  const [messages, setMessages] = useState<Message[]>(
+    Array.isArray(messagesLocal) ? messagesLocal : []
+  );
+
+  useEffect(() => {
+    handleMessages(messages);
+  }, [messages]);
+
+  const handleAddMessage = (message: Message) => {
+    setMessages((curr) => [...curr, message]);
+  };
 
   const handleAddContact = (contact: Contact) => {
     if (Array.isArray(contacts)) {
@@ -101,10 +114,12 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
   };
 
   const clearAll = () => {
-    if (confirm("Are you sure you want to delete all contacts?")) {
-      handleContacts([]);
-      handleChats([]);
-      handleMessages([]);
+    if (confirm("Are you sure you want to delete all local data?")) {
+      localStorage.removeItem("messages");
+      localStorage.removeItem("chats");
+      localStorage.removeItem("contacts");
+
+      setActiveChat(null);
     }
   };
 
@@ -212,8 +227,6 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
       const senderData: SenderData = data?.body?.senderData;
 
       if (messageData && senderData) {
-        const temp = Array.isArray(messages) ? messages : [];
-
         const newMessage = {
           id: response?.data?.body?.idMessage ?? crypto.randomUUID(),
           message:
@@ -223,8 +236,9 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
           chatId: senderData?.chatId,
         };
 
-        console.log(newMessage);
-        handleMessages([...temp, newMessage]);
+        handleAddMessage(newMessage);
+      } else {
+        console.log("no message data");
       }
 
       const receiptId = data?.receiptId;
@@ -234,7 +248,11 @@ export default function GlobalProvider({ children }: { children: ReactNode }) {
 
         // Continue polling if there's a valid response
         scheduleNextFetch(100);
+      } else {
+        console.log("No receiptId");
       }
+
+      console.log("Receive End");
     } catch (error) {
       console.error("Polling stopped due to error:", error);
 
