@@ -7,9 +7,13 @@ export default function ChatPage() {
   const { activeChat, messages, ReceiveNotification } =
     useContext(GlobalContext);
 
-  const chatMessages = Array.isArray(messages)
-    ? messages.filter((item) => item.chatId === activeChat?.id)
-    : [];
+  const chatMessages =
+    Array.isArray(messages) && messages.length !== 0
+      ? messages.filter((item) => item?.chatId === activeChat?.id)
+      : [];
+
+  console.log(messages);
+  console.log(chatMessages);
 
   useEffect(() => {}, [messages]);
 
